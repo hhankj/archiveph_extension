@@ -1,0 +1,1 @@
+This chrome extension allows the user to access a paywall'd news article from the click of a button!
