@@ -16,10 +16,6 @@ Click the extension button on any article, and it'll redirect you to the archive
 6. Select the downloaded folder
 7. You're ready to go!
 
-
-
-
-
-
+(I'm too cheap to pay the developer fee for Chrome)
 
 rip 12ft.io
