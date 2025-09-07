@@ -1,10 +1,10 @@
 # Fuck a Paywall
 
-A Chrome extension that redirects any webpage to its archive.ph version, bypassing paywalls with one click.
+A Chrome extension that redirects any webpage to its archive.today version, bypassing paywalls with one click.
 
 ## What it does
 
-Click the extension button on any article, and it'll redirect you to the archived version on archive.ph; no more subscription prompts or article limits.
+Click the extension button on any article, and it'll redirect you to the archived version on archive.today; no more subscription prompts or article limits.
 
 ## Installation
 

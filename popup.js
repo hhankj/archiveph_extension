@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const currentUrl = currentTab.url;
       
       if (currentUrl && (currentUrl.startsWith('http://') || currentUrl.startsWith('https://'))) {
-        const archiveUrl = `https://archive.ph/newest/${currentUrl}`;
+        const archiveUrl = `https://archive.today/newest/${currentUrl}`;
         
         chrome.tabs.update(currentTab.id, { url: archiveUrl });
         

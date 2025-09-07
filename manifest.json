@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Bypass Paywalls through Archive.ph",
   "version": "1.0",
-  "description": "Redirect any webpage to its archive.ph version to bypass paywalls",
+  "description": "Redirect any webpage to its archive.today version to bypass paywalls",
   "permissions": [
     "activeTab"
   ],
