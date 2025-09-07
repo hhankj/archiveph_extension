@@ -1,10 +1,13 @@
 {
   "manifest_version": 3,
-  "name": "Bypass Paywalls through Archive.ph",
+  "name": "Bypass Paywalls through Archive.today",
   "version": "1.0",
   "description": "Redirect any webpage to its archive.today version to bypass paywalls",
   "permissions": [
     "activeTab"
+  ],
+  "host_permissions": [
+    "https://archive.today/*"
   ],
   "action": {
     "default_popup": "popup.html",
