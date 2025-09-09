@@ -12,18 +12,26 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (currentUrl && (currentUrl.startsWith('http://') || currentUrl.startsWith('https://'))) {
         try {
-          const checkUrl = `https://archive.today/timemap/${currentUrl}`;
+          // Normalize URL by removing common tracking parameters
+          const normalizedUrl = normalizeUrl(currentUrl);
+          console.log('Original URL:', currentUrl);
+          console.log('Normalized URL:', normalizedUrl);
+          
+          const checkUrl = `https://archive.today/timemap/${normalizedUrl}`;
           const response = await fetch(checkUrl);
+          console.log('Archive check response:', response.status);
           
           if (response.ok && response.status !== 404) {
-            const archiveUrl = `https://archive.today/newest/${currentUrl}`;
+            const archiveUrl = `https://archive.today/newest/${normalizedUrl}`;
             chrome.tabs.update(currentTab.id, { url: archiveUrl });
             window.close();
           } else {
-            showNoArchiveOptions(currentTab, currentUrl);
+            showNoArchiveOptions(currentTab, normalizedUrl);
           }
         } catch (error) {
-          const archiveUrl = `https://archive.today/newest/${currentUrl}`;
+          console.error('Archive check failed:', error);
+          const normalizedUrl = normalizeUrl(currentUrl);
+          const archiveUrl = `https://archive.today/newest/${normalizedUrl}`;
           chrome.tabs.update(currentTab.id, { url: archiveUrl });
           window.close();
         }
@@ -32,6 +40,31 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
   });
+
+  function normalizeUrl(url) {
+    try {
+      const urlObj = new URL(url);
+      
+      // Common tracking parameters to remove
+      const trackingParams = [
+        'mod', 'ref', 'referer', 'referrer', 
+        'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
+        'fbclid', 'gclid', 'msclkid', 'twclid', 
+        'mc_cid', 'mc_eid', '_ga', 'source',
+        'WT.mc_id', 'campaign', 'medium'
+      ];
+      
+      // Remove tracking parameters
+      trackingParams.forEach(param => {
+        urlObj.searchParams.delete(param);
+      });
+      
+      return urlObj.toString();
+    } catch (error) {
+      // If URL parsing fails, return original URL
+      return url;
+    }
+  }
 
   function showNoArchiveOptions(tab, url) {
     convertBtn.textContent = 'Bypass';
