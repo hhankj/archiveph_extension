@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if (currentUrl && (currentUrl.startsWith('http://') || currentUrl.startsWith('https://'))) {
         try {
-          // Normalize URL by removing common tracking parameters
           const normalizedUrl = normalizeUrl(currentUrl);
           console.log('Original URL:', currentUrl);
           console.log('Normalized URL:', normalizedUrl);
@@ -23,10 +22,18 @@ document.addEventListener('DOMContentLoaded', function() {
           
           if (response.ok && response.status !== 404) {
             const archiveUrl = `https://archive.today/newest/${normalizedUrl}`;
-            chrome.tabs.update(currentTab.id, { url: archiveUrl });
-            window.close();
+            
+            const isUsableArchive = await checkArchiveUsability(archiveUrl);
+            
+            if (isUsableArchive) {
+              chrome.tabs.update(currentTab.id, { url: archiveUrl });
+              window.close();
+            } else {
+              console.log('Archive exists but shows JS/adblocker error, offering to create new archive');
+              showNoArchiveOptions(currentTab, normalizedUrl, true);
+            }
           } else {
-            showNoArchiveOptions(currentTab, normalizedUrl);
+            showNoArchiveOptions(currentTab, normalizedUrl, false);
           }
         } catch (error) {
           console.error('Archive check failed:', error);
@@ -41,11 +48,42 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 
+  async function checkArchiveUsability(archiveUrl) {
+    try {
+      console.log('Checking archive usability:', archiveUrl);
+      
+      const response = await fetch(archiveUrl);
+      if (!response.ok) {
+        return false;
+      }
+      
+      const content = await response.text();
+      
+      const errorPatterns = [
+        'Please enable JS and disable any ad blocker',
+        'Please enable JavaScript and disable any ad blocker',
+        'JavaScript is disabled',
+        'This site requires JavaScript',
+        'Enable JavaScript to continue'
+      ];
+      
+      const hasError = errorPatterns.some(pattern => 
+        content.toLowerCase().includes(pattern.toLowerCase())
+      );
+      
+      console.log('Archive usability check:', hasError ? 'UNUSABLE (has JS/adblocker error)' : 'USABLE');
+      return !hasError;
+      
+    } catch (error) {
+      console.error('Error checking archive usability:', error);
+      return true;
+    }
+  }
+
   function normalizeUrl(url) {
     try {
       const urlObj = new URL(url);
       
-      // Common tracking parameters to remove
       const trackingParams = [
         'mod', 'ref', 'referer', 'referrer', 
         'utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content',
@@ -54,19 +92,17 @@ document.addEventListener('DOMContentLoaded', function() {
         'WT.mc_id', 'campaign', 'medium'
       ];
       
-      // Remove tracking parameters
       trackingParams.forEach(param => {
         urlObj.searchParams.delete(param);
       });
       
       return urlObj.toString();
     } catch (error) {
-      // If URL parsing fails, return original URL
       return url;
     }
   }
 
-  function showNoArchiveOptions(tab, url) {
+  function showNoArchiveOptions(tab, url, archiveExistsButBroken = false) {
     convertBtn.textContent = 'Bypass';
     convertBtn.style.background = '#b50011';
     convertBtn.disabled = false;
@@ -81,15 +117,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     const optionsDiv = document.createElement('div');
     optionsDiv.className = 'options';
+    const message = archiveExistsButBroken 
+      ? "Archive exists but may not work properly." 
+      : "This page hasn't been archived yet.";
+    const buttonText = archiveExistsButBroken 
+      ? "Create Fresh Archive" 
+      : "Create Archive";
+    
     optionsDiv.innerHTML = `
-      <p class="no-archive-message">This page hasn't been archived yet.</p>
-      <button id="createArchive" class="option-btn">Create Archive</button>
+      <p class="no-archive-message">${message}</p>
+      <button id="createArchive" class="option-btn">${buttonText}</button>
     `;
     
     container.appendChild(optionsDiv);
     
     document.getElementById('createArchive').addEventListener('click', function() {
-      const createUrl = `https://archive.today/?run=1&url=${encodeURIComponent(url)}`;
+        const createUrl = `https://archive.today/submit/?url=${encodeURIComponent(url)}`;
       chrome.tabs.update(tab.id, { url: createUrl });
       window.close();
     });
