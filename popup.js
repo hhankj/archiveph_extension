@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
           const response = await fetch(checkUrl);
           
           if (response.ok && response.status !== 404) {
-            // Archive exists - show options to use existing or create ne
             showArchiveOptions(currentTab, normalizedUrl);
           } else {
             showNoArchiveOptions(currentTab, normalizedUrl);
@@ -60,7 +59,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showArchiveOptions(tab, url) {
-    // Archive exists - automatically redirect to existing archive
     const archiveUrl = `https://archive.today/newest/${url}`;
     chrome.tabs.update(tab.id, { url: archiveUrl });
     window.close();
