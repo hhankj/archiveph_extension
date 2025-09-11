@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const response = await fetch(checkUrl);
           
           if (response.ok && response.status !== 404) {
-            // Archive exists - show options to use existing or create new
+            // Archive exists - show options to use existing or create ne
             showArchiveOptions(currentTab, normalizedUrl);
           } else {
             showNoArchiveOptions(currentTab, normalizedUrl);
@@ -60,40 +60,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function showArchiveOptions(tab, url) {
-    convertBtn.textContent = 'Bypass';
-    convertBtn.style.background = '#b50011';
-    convertBtn.disabled = false;
-    convertBtn.style.opacity = '1';
-    
-    const container = document.querySelector('.container');
-    
-    const existingOptions = container.querySelector('.options');
-    if (existingOptions) {
-      existingOptions.remove();
-    }
-    
-    const optionsDiv = document.createElement('div');
-    optionsDiv.className = 'options';
-    
-    optionsDiv.innerHTML = `
-      <p class="no-archive-message">Archive found. Choose an option:</p>
-      <button id="useExisting" class="option-btn">Use Existing Archive</button>
-      <button id="createNew" class="option-btn">Create New Archive</button>
-    `;
-    
-    container.appendChild(optionsDiv);
-    
-    document.getElementById('useExisting').addEventListener('click', function() {
-      const archiveUrl = `https://archive.today/newest/${encodeURIComponent(url)}`;
-      chrome.tabs.update(tab.id, { url: archiveUrl });
-      window.close();
-    });
-    
-    document.getElementById('createNew').addEventListener('click', function() {
-      const createUrl = `https://archive.today/submit/?url=${encodeURIComponent(url)}&anyway=1`;
-      chrome.tabs.update(tab.id, { url: createUrl });
-      window.close();
-    });
+    // Archive exists - automatically redirect to existing archive
+    const archiveUrl = `https://archive.today/newest/${url}`;
+    chrome.tabs.update(tab.id, { url: archiveUrl });
+    window.close();
   }
 
   function showNoArchiveOptions(tab, url) {
